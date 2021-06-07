@@ -1,0 +1,69 @@
+module bgp-leak {
+
+  namespace "http://example.com/bgp-leak";
+  prefix bgp-leak;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+  import tailf-ned-cisco-ios-xr {
+    prefix cisco-ios-xr;
+  }
+
+  description
+    "Bla bla...";
+
+  revision 2016-01-01 {
+    description
+      "Initial revision.";
+  }
+
+  list bgp-leak {
+    description "This is an RFS skeleton service";
+
+    key name;
+    leaf name {
+      tailf:info "name to identify this specific leak in NSO";
+      type string;
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint bgp-leak-servicepoint;
+
+    // may replace this with other ways of refering to the devices.
+    leaf device {
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    // replace with your own stuff here
+    leaf source-vrf {
+      tailf:info "VRF to import route from";
+      type leafref {
+        path "/ncs:devices/ncs:device[ncs:name=current()/../device]/ncs:config/cisco-ios-xr:interface/cisco-ios-xr:Loopback/cisco-ios-xr:vrf";
+      }
+    }
+
+    leaf destination-vrf {
+      tailf:info "VRF to import route to";
+      type leafref {
+        path "/ncs:devices/ncs:device[ncs:name=current()/../device]/ncs:config/cisco-ios-xr:interface/cisco-ios-xr:Loopback/cisco-ios-xr:vrf";
+      }
+    }
+
+    list prefix_import {
+      key prefix_set;
+      leaf prefix_set {
+        tailf:info "prefix to import into VRF";
+        type inet:ip-prefix;
+      }
+    }
+  }
+}
